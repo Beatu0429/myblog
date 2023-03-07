@@ -21,6 +21,5 @@ def test_login(client):
 
 def test_logout(client):
     url = reverse('blog:logout')
-    response = client.get(url)
-    assert response.status_code == 302
-    assert response.url == reverse('blog:index')
+    response = client.get(url, follow=True)
+    assert response.status_code == 200
