@@ -4,6 +4,10 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.forms import AuthenticationForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Post
+from .api.serializers import PostSerializer
 
 # Create your views here.
 def index(request):
@@ -46,3 +50,10 @@ def logout_request(request):
 	logout(request)
 	messages.info(request, "You have successfully logged out.") 
 	return redirect("blog:index")
+
+
+class PostList(APIView):
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
