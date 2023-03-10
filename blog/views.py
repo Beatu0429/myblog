@@ -2,14 +2,10 @@ from django.shortcuts import render, redirect
 from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.http import HttpResponse
 from django.contrib.auth.forms import AuthenticationForm
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics, mixins
 from .models import Post
 from .api.serializers import PostSerializer
-from rest_framework.decorators import api_view
 
 # Create your views here.
 def index(request):
