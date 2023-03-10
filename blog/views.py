@@ -6,8 +6,10 @@ from django.http import HttpResponse
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from .models import Post
 from .api.serializers import PostSerializer
+from rest_framework.decorators import api_view
 
 # Create your views here.
 def index(request):
@@ -52,8 +54,9 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-class PostList(APIView):
-    def get(self, request):
+@api_view(['GET'])
+def post_list(request):
+    if request.method == 'GET':
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
