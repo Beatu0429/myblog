@@ -2,14 +2,10 @@ from django.shortcuts import render, redirect
 from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.http import HttpResponse
 from django.contrib.auth.forms import AuthenticationForm
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics, mixins
 from .models import Post
 from .api.serializers import PostSerializer
-from rest_framework.decorators import api_view
 
 # Create your views here.
 def index(request):
@@ -54,9 +50,9 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-@api_view(['GET'])
-def post_list(request):
-    if request.method == 'GET':
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class PostsViewSet(mixins.ListModelMixin, generics.GenericAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
