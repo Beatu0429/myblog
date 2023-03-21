@@ -31,21 +31,21 @@ def test_logout(client):
     assert response.status_code == 200
 
 
-@pytest.mark.django_db
-def test_post_list():
-    # Create a test user
-    test_user = User.objects.create_user(
-        username='testuser',
-        password='testpass'
-    )
+@pytest.fixture
+def user():
+    return User.objects.create_user(username='testuser', password='testpassword')
 
+
+@pytest.mark.django_db
+def test_post_list(user):
     # Create some test posts with the test user as author
-    Post.objects.create(author=test_user, title='Test Post 1', body='This is test post 1')
-    Post.objects.create(author=test_user, title='Test Post 2', body='This is test post 2')
+    Post.objects.create(author=user, title='Test Post 1', body='This is test post 1')
+    Post.objects.create(author=user, title='Test Post 2', body='This is test post 2')
 
     # Make GET request to the PostList API view
     client = APIClient()
     url = reverse('blog:post-list')
+    client.force_authenticate(user=user)
     response = client.get(url)
 
     # Check if the response status code is 200 OK
