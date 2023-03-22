@@ -3,10 +3,9 @@ from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
-from rest_framework import generics, mixins, status
+from rest_framework import viewsets, mixins, status
 from .models import Post
 from .api.serializers import PostSerializer
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -53,21 +52,17 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, **serializer.validated_data)
+        serializer.save(author=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

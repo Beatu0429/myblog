@@ -1,17 +1,11 @@
 import pytest
 from django.urls import reverse
-from django.test import Client
 from rest_framework import status
 from rest_framework.test import APIClient
 from blog.models import Post
-from django.contrib.auth.models import User
 from blog.api.serializers import PostSerializer
 from blog import views
 
-
-@pytest.fixture
-def client():
-    return Client()
 
 def test_register(client):
     url = reverse('blog:register')
@@ -31,27 +25,18 @@ def test_logout(client):
     assert response.status_code == 200
 
 
-@pytest.fixture
-def user():
-    return User.objects.create_user(username='testuser', password='testpassword')
-
-
 @pytest.mark.django_db
 def test_post_list(user):
-    # Create some test posts with the test user as author
     Post.objects.create(author=user, title='Test Post 1', body='This is test post 1')
     Post.objects.create(author=user, title='Test Post 2', body='This is test post 2')
 
-    # Make GET request to the PostList API view
     client = APIClient()
     url = reverse('blog:post-list')
     client.force_authenticate(user=user)
     response = client.get(url)
 
-    # Check if the response status code is 200 OK
     assert response.status_code == status.HTTP_200_OK
 
-    # Check if the response contains the correct number of posts
     expected_count = Post.objects.count()
     actual_count = len(response.data)
     assert actual_count == expected_count
