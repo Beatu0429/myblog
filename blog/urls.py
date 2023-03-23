@@ -1,11 +1,7 @@
 from django.urls import path
 from . import views
-from rest_framework import routers
 
 app_name = "blog" 
-
-router = routers.DefaultRouter()
-router.register(r'posts', views.PostsViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),
