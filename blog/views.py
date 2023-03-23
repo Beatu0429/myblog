@@ -3,9 +3,11 @@ from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
-from rest_framework import generics, mixins
+from rest_framework import viewsets, mixins, status
 from .models import Post
 from .api.serializers import PostSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 # Create your views here.
 def index(request):
@@ -50,9 +52,10 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-class PostsViewSet(mixins.ListModelMixin, generics.GenericAPIView):
+class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

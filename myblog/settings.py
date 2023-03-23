@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'crispy_forms', 
     'crispy_bootstrap4',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -58,6 +59,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'myblog.urls'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 
 TEMPLATES = [
     {
