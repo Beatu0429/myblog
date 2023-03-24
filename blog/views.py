@@ -52,7 +52,7 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class PostsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('author')
     serializer_class = PostSerializer
