@@ -54,7 +54,7 @@ def logout_request(request):
 
 class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('author')
     serializer_class = PostSerializer
 
     def perform_create(self, serializer):
