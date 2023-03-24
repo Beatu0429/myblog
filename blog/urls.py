@@ -9,4 +9,5 @@ urlpatterns = [
     path("login", views.login_request, name="login"),
     path("logout/", views.logout_request, name= "logout"),
     path('api/post', views.PostsViewSet.as_view({'get': 'list', 'post': 'create'}), name='post-list'),
+    path('api/post/<int:pk>/', views.PostDetailViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='post-detail'),
 ]

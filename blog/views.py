@@ -59,3 +59,8 @@ class PostsViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gene
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+	
+
+class PostDetailViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+	serializer_class = PostSerializer
+	queryset = Post.objects.all()
