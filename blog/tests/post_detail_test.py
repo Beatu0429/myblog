@@ -1,12 +1,12 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APIClient
 from blog.models import Post
 import json
 
 @pytest.mark.django_db
-def test_retrieve_post(client, post):
+def test_retrieve_post(client, post, user):
+    client.force_login(user=user)
     response = client.get(reverse('blog:post-detail', args=[post.pk]))
 
     assert response.status_code == status.HTTP_200_OK
@@ -14,7 +14,8 @@ def test_retrieve_post(client, post):
     assert response.data['body'] == post.body
     
 @pytest.mark.django_db
-def test_partial_update_post(client, post):
+def test_partial_update_post(client, post, user):
+    client.force_login(user=user)
     new_data = {'title': 'New Title'}
     response = client.patch(
         reverse('blog:post-detail', args=[post.pk]),
@@ -28,7 +29,8 @@ def test_partial_update_post(client, post):
     assert post.title == 'New Title'
     
 @pytest.mark.django_db
-def test_delete_post(client, post):
+def test_delete_post(client, post, user):
+    client.force_login(user=user)
     response = client.delete(reverse('blog:post-detail', args=[post.pk]))
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
