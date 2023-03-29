@@ -4,8 +4,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework import viewsets, mixins, status
-from .models import Post
-from .api.serializers import PostSerializer
+from .models import Post, Comment
+from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -59,3 +59,13 @@ class PostsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class CommentsViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'partial_update', 'list']:
+            return CommentSerializer
+        return CommentPostSerializer
+    def perform_create(self, serializer):
+        serializer.save()
