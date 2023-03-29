@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from blog.models import Post
 from blog.api.serializers import PostSerializer
 from blog import views
+from django.conf import settings
 
 
 def test_register(client):
@@ -33,10 +34,13 @@ def test_post_list(user):
     client = APIClient()
     url = reverse('blog:post-list')
     client.force_authenticate(user=user)
+    settings.REST_FRAMEWORK['PAGE_SIZE'] = 42
     response = client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
 
     expected_count = Post.objects.count()
-    actual_count = len(response.data)
+    actual_count = len(response.data['results'])
     assert actual_count == expected_count
+
+    assert actual_count <= settings.REST_FRAMEWORK['PAGE_SIZE']
