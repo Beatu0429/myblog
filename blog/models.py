@@ -5,11 +5,17 @@ from django.utils import timezone
 
 # Create your models here.
 
+def get_image_upload_path(instance, filename):
+    return f'uploads/images/{datetime.now().strftime("%Y/%m/%d")}/{filename}'
+
+
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, validators=[MinLengthValidator(1)])
     body = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
     created_at = models.DateTimeField(default=timezone.now)
+    img = models.ImageField(upload_to='uploads/images/%Y/%m/%d/', blank=True, null=True)
+    safe = models.BooleanField(default=True)
     def __str__(self):
         return self.title
     
