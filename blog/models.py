@@ -16,6 +16,11 @@ class Post(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     img = models.ImageField(upload_to='uploads/images/%Y/%m/%d/', blank=True, null=True)
     safe = models.BooleanField(default=True)
+
+    @property
+    def comments_count(self):
+        return self.comment_set.count()
+    
     def __str__(self):
         return self.title
     
