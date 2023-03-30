@@ -5,10 +5,6 @@ from django.utils import timezone
 
 # Create your models here.
 
-def get_image_upload_path(instance, filename):
-    return f'uploads/images/{datetime.now().strftime("%Y/%m/%d")}/{filename}'
-
-
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, validators=[MinLengthValidator(1)])
