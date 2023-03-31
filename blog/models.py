@@ -18,6 +18,15 @@ class Post(models.Model):
     def comments_count(self):
         return self.comment_set.count()
     
+    @property
+    def tagged_count(self):
+        return self.tagged_users.count()
+
+    @property
+    def last_tag_date(self):
+        last_tag = self.tagged_users.order_by('-usertag__created_at').first()
+        return last_tag.usertag.created_at if last_tag else None
+    
     def __str__(self):
         return self.title
     
