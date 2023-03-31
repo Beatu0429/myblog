@@ -6,7 +6,7 @@ class PostSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ['body', 'title', 'author']
+        fields = ['body', 'title', 'author', 'img', 'safe', 'comments_count', 'created_at']
 
 
 class BlogpostSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'body', 'blogpost', 'user']
+        fields = ['id', 'body', 'blogpost', 'user', 'created_at']
 
 
 class CommentPostSerializer(serializers.ModelSerializer):
