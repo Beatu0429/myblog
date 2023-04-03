@@ -24,8 +24,8 @@ class Post(models.Model):
 
     @property
     def last_tag_date(self):
-        last_tag = self.tagged_users.order_by('-usertag__created_at').first()
-        return last_tag.usertag.created_at if last_tag else None
+        last_tag = self.usertag_set.order_by('-created_at').first()
+        return last_tag.created_at.date() if last_tag else None
     
     def __str__(self):
         return self.title
