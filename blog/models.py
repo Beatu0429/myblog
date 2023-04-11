@@ -12,14 +12,30 @@ class Post(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     img = models.ImageField(upload_to='uploads/images/%Y/%m/%d/', blank=True, null=True)
     safe = models.BooleanField(default=True)
+    tagged_users = models.ManyToManyField(User, through='UserTag', related_name='tagged_posts')
 
     @property
     def comments_count(self):
         return self.comment_set.count()
     
+    @property
+    def tagged_count(self):
+        return self.tagged_users.count()
+
+    @property
+    def last_tag_date(self):
+        last_tag = self.usertag_set.order_by('-created_at').first()
+        return last_tag.created_at.date() if last_tag else None
+    
     def __str__(self):
         return self.title
     
+
+class UserTag(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
 class Comment(models.Model):
     body = models.CharField(max_length=255)
