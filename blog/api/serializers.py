@@ -6,7 +6,7 @@ class PostSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ['body', 'title', 'author', 'img', 'safe', 'comments_count', 'created_at']
+        fields = ['body', 'title', 'author', 'img', 'safe', 'comments_count', 'created_at', 'tagged_count', 'last_tag_date', 'tagged_users']
 
 
 class BlogpostSerializer(serializers.ModelSerializer):
