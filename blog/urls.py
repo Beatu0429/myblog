@@ -14,4 +14,5 @@ urlpatterns = [
     path("login/", views.login_request, name="login"),
     path("logout/", views.logout_request, name= "logout"),
     path('api/', include(router.urls)),
+    path('api/post/my-tags/', views.PostsViewSet.as_view({'get': 'my_tags'}), name='my-tags'),
 ]
