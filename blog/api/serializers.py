@@ -9,6 +9,14 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['body', 'title', 'author', 'img', 'safe', 'comments_count', 'created_at', 'tagged_count', 'last_tag_date', 'tagged_users']
 
 
+class TaggedPostSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ('id', 'title')
+
 class BlogpostSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
     

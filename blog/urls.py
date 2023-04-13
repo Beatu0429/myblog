@@ -1,15 +1,17 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework import routers
 
 app_name = "blog" 
+
+router = routers.SimpleRouter()
+router.register(r'post', views.PostsViewSet, basename='post')
+router.register(r'comment', views.CommentsViewSet, basename='comment')
 
 urlpatterns = [
     path('', views.index, name='index'),
     path("register/", views.register_request, name="register"),
     path("login/", views.login_request, name="login"),
     path("logout/", views.logout_request, name= "logout"),
-    path('api/post/', views.PostsViewSet.as_view({'get': 'list', 'post': 'create'}), name='post-list'),
-    path('api/post/<int:pk>/', views.PostsViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='post-detail'),
-    path('api/comment/', views.CommentsViewSet.as_view({'get': 'list', 'post': 'create'}), name='comment-list'),
-    path('api/comment/<int:pk>/', views.CommentsViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='comment-detail'),
+    path('api/', include(router.urls)),
 ]
