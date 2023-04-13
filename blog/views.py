@@ -4,8 +4,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import action
 from .models import Post, Comment
-from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer
+from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer, TaggedPostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -56,9 +57,16 @@ class PostsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('author')
     serializer_class = PostSerializer
-
+    
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+	
+    @action(detail=False, methods=['get'], url_path=r'my-tags')
+    def my_tags(self, request):
+        user = request.user
+        tagged_posts = Post.objects.filter(tagged_users=user)
+        serializer = TaggedPostSerializer(tagged_posts, many=True)
+        return Response(serializer.data)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
