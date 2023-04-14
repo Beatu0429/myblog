@@ -9,6 +9,8 @@ from .models import Post, Comment
 from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer, TaggedPostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 # Create your views here.
 def index(request):
@@ -57,6 +59,10 @@ class PostsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('author')
     serializer_class = PostSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['safe']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
