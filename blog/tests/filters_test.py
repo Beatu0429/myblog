@@ -1,39 +1,81 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myblog.settings')
 import pytest
-from django.contrib.auth.models import User
+from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from mixer.backend.django import mixer
 from blog.models import Post
 
 @pytest.mark.django_db
-class PostViewSetTest(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser', password='testpass')
-        self.post1 = Post.objects.create(
-            title='Title 1',
-            body='Body 1',
-            author=self.user,
-            safe=True,
-        )
-        self.post2 = Post.objects.create(
-            title='Title 2',
-            body='Body 2',
-            author=self.user,
-            safe=False,
-        )
-        self.client.force_authenticate(user=self.user)
+def test_filter_by_user(client, post, user):
+    client.force_login(user=user)
+    url = reverse('blog:post-list') + f'?user={user.id}'
+    response = client.get(url)
+    print(response.data)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 1
 
-    def test_filter_by_safe(self):
-        url = '/blog/api/post/?safe=true'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1)
-        self.assertEqual(response.data[0]['title'], self.post1.title)
 
-    def test_filter_by_user_id(self):
-        url = f'/blog/api/post/?user={self.user.id}'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 2)
-        self.assertEqual(response.data[0]['title'], self.post1.title)
-        self.assertEqual(response.data[1]['title'], self.post2.title)
+@pytest.mark.django_db
+def test_filter_by_safe(client, safe_post, unsafe_post, user):
+    client.force_login(user=user)
+    url = reverse('blog:post-list') + '?safe=True'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['author'] == user.username
+    assert response.data['results'][0]['safe'] == safe_post.safe
+
+
+@pytest.mark.django_db
+def test_order_by_author(client, user):
+    post1 = mixer.blend(Post, author=user)
+    post2 = mixer.blend(Post, author=user)
+    post3 = mixer.blend(Post, author=user)
+    client.force_login(user=user)
+    url = reverse('blog:post-list') + '?ordering=author'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 3
+
+
+@pytest.mark.django_db
+def test_order_by_safe(client, user, safe_post, unsafe_post):
+    client.force_login(user=user)
+    url = reverse('blog:post-list') + '?ordering=safe'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 2
+    assert response.data['results'][0]['safe'] == unsafe_post.safe
+    assert response.data['results'][1]['safe'] == safe_post.safe
+
+
+@pytest.mark.django_db
+def test_search(client, user):
+    post1 = mixer.blend(Post, title='The quick brown fox', author=user)
+    post2 = mixer.blend(Post, body='jumps over the lazy dog', author=user)
+    post3 = mixer.blend(Post, author=user)
+    client.force_login(user=user)
+    url = reverse('blog:post-list') + '?search=quick'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['title'] == post1.title
+
+    url = reverse('blog:post-list') + '?search=dog'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['body'] == post2.body
+
+    url = reverse('blog:post-list') + '?search=brown+fox'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['title'] == post1.title
+
+
+    url = reverse('blog:post-list') + '?search=xyz'
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data['results']) == 0

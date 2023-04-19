@@ -37,3 +37,22 @@ def tagged_post(users_list):
     for user in users_list:
         mixer.blend(UserTag, post=post, user=user)
     return post
+
+@pytest.fixture
+def post_factory(author, title, body, safe=False):
+    return Post.objects.create(
+        author=author,
+        title=title,
+        body=body,
+        safe=safe
+    )
+
+
+@pytest.fixture
+def safe_post(user):
+    return mixer.blend(Post, author=user, safe=True)
+
+
+@pytest.fixture
+def unsafe_post(user):
+    return mixer.blend(Post, author=user, safe=False)
