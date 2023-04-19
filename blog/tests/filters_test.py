@@ -1,5 +1,3 @@
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myblog.settings')
 import pytest
 from django.urls import reverse
 from rest_framework import status
