@@ -1,7 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
 from django.test import Client
-from blog.models import Post, Comment, UserTag
+from blog.models import Post, Comment, UserTag, Like
+from django.contrib.contenttypes.models import ContentType
 from mixer.backend.django import mixer
 
 @pytest.fixture
@@ -56,3 +57,13 @@ def safe_post(user):
 @pytest.fixture
 def unsafe_post(user):
     return mixer.blend(Post, author=user, safe=False)
+
+@pytest.fixture
+def like(user, post):
+    content_type = ContentType.objects.get_for_model(Post)
+    return Like.objects.create(user=user, content_type=content_type, object_id=post.id)
+
+@pytest.fixture
+def comment_like(user, comment):
+    content_type = ContentType.objects.get_for_model(Comment)
+    return Like.objects.create(user=user, content_type=content_type, object_id=comment.id)

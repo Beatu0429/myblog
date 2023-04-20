@@ -57,5 +57,8 @@ class Like(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
+    class Meta:
+        unique_together = ('user', 'content_type', 'object_id')
+
     def __str__(self):
         return f"{self.user.username} liked {self.content_type.model} {self.object_id}"
