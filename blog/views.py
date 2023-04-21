@@ -83,7 +83,7 @@ class PostsViewSet(viewsets.ModelViewSet):
         serializer = TaggedPostSerializer(tagged_posts, many=True)
         return Response(serializer.data)
     
-    @action(detail=True, methods=['get'], url_path=r'like')
+    @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
         like, created = post.likes.get_or_create(user=request.user)
@@ -91,7 +91,7 @@ class PostsViewSet(viewsets.ModelViewSet):
             return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'liked'})
 
-    @action(detail=True, methods=['get'], url_path=r'unlike')
+    @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
         try:
@@ -111,7 +111,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save()
     
-    @action(detail=True, methods=['get'], url_path=r'like')
+    @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
         like, created = comment.likes.get_or_create(user=request.user)
@@ -119,7 +119,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
             return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'liked'})
 
-    @action(detail=True, methods=['get'], url_path=r'unlike')
+    @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
         try:
