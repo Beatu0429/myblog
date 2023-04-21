@@ -4,7 +4,7 @@ from rest_framework import routers
 
 app_name = "blog" 
 
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 router.register(r'post', views.PostsViewSet, basename='post')
 router.register(r'comment', views.CommentsViewSet, basename='comment')
 

@@ -9,6 +9,7 @@ from .models import Post, Comment
 from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer, TaggedPostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import filters
 
 # Create your views here.
 def index(request):
@@ -55,8 +56,20 @@ def logout_request(request):
 
 class PostsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all().order_by('author')
     serializer_class = PostSerializer
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    ordering_fields = ['author', 'safe']
+    search_fields = ['title', 'body', 'author__username']
+    
+    def get_queryset(self):
+        queryset = Post.objects.all().order_by('author')
+        user_id = self.request.query_params.get('user')
+        is_safe = self.request.query_params.get('safe')
+        if user_id is not None:
+            queryset = queryset.filter(author=user_id)
+        if is_safe is not None:
+            queryset = queryset.filter(safe=is_safe)
+        return queryset
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
