@@ -5,11 +5,13 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .api.serializers import PostSerializer, CommentSerializer, CommentPostSerializer, TaggedPostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import filters
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
 
 # Create your views here.
 def index(request):
@@ -80,6 +82,24 @@ class PostsViewSet(viewsets.ModelViewSet):
         tagged_posts = Post.objects.filter(tagged_users=user)
         serializer = TaggedPostSerializer(tagged_posts, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], url_path=r'like')
+    def like(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = post.likes.get_or_create(user=request.user)
+        if not created:
+            return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': 'liked'})
+
+    @action(detail=True, methods=['get'], url_path=r'unlike')
+    def unlike(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        try:
+            like = post.likes.get(user=request.user)
+        except Like.DoesNotExist:
+            return Response({'status': 'not liked'}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response({'status': 'unliked'})
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -90,3 +110,21 @@ class CommentsViewSet(viewsets.ModelViewSet):
         return CommentPostSerializer
     def perform_create(self, serializer):
         serializer.save()
+    
+    @action(detail=True, methods=['get'], url_path=r'like')
+    def like(self, request, pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        like, created = comment.likes.get_or_create(user=request.user)
+        if not created:
+            return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': 'liked'})
+
+    @action(detail=True, methods=['get'], url_path=r'unlike')
+    def unlike(self, request, pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        try:
+            like = comment.likes.get(user=request.user)
+        except Like.DoesNotExist:
+            return Response({'status': 'not liked'}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response({'status': 'unliked'})
