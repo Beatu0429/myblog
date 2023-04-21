@@ -101,11 +101,11 @@ class PostsViewSet(viewsets.ModelViewSet, LikeModelMixin):
         serializer = TaggedPostSerializer(tagged_posts, many=True)
         return Response(serializer.data)
     
-    @action(detail=True, methods=['get'], url_path=r'like')
+    @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
         return super().like(request, pk)
     
-    @action(detail=True, methods=['get'], url_path=r'unlike')
+    @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
         return super().unlike(request, pk)
 
@@ -119,10 +119,10 @@ class CommentsViewSet(viewsets.ModelViewSet, LikeModelMixin):
     def perform_create(self, serializer):
         serializer.save()
     
-    @action(detail=True, methods=['get'], url_path=r'like')
+    @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
         return super().like(request, pk)
     
-    @action(detail=True, methods=['get'], url_path=r'unlike')
+    @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
         return super().unlike(request, pk)
