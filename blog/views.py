@@ -56,7 +56,25 @@ def logout_request(request):
 	return redirect("blog:index")
 
 
-class PostsViewSet(viewsets.ModelViewSet):
+class LikeModelMixin:
+    def like(self, request, *args, **kwargs):
+        instance = self.get_object()
+        like, created = instance.likes.get_or_create(user=request.user)
+        if not created:
+            return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': 'liked'})
+        
+    def unlike(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            like = instance.likes.get(user=request.user)
+        except Like.DoesNotExist:
+            return Response({'status': 'not liked'}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response({'status': 'unliked'})
+
+
+class PostsViewSet(viewsets.ModelViewSet, LikeModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
@@ -85,24 +103,14 @@ class PostsViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        like, created = post.likes.get_or_create(user=request.user)
-        if not created:
-            return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': 'liked'})
-
+        return super().like(request, pk)
+    
     @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        try:
-            like = post.likes.get(user=request.user)
-        except Like.DoesNotExist:
-            return Response({'status': 'not liked'}, status=status.HTTP_400_BAD_REQUEST)
-        like.delete()
-        return Response({'status': 'unliked'})
+        return super().unlike(request, pk)
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentsViewSet(viewsets.ModelViewSet, LikeModelMixin):
     queryset = Comment.objects.all()
     def get_serializer_class(self):
         if self.action in ['retrieve', 'partial_update', 'list']:
@@ -113,18 +121,8 @@ class CommentsViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], url_path=r'like')
     def like(self, request, pk):
-        comment = get_object_or_404(Comment, pk=pk)
-        like, created = comment.likes.get_or_create(user=request.user)
-        if not created:
-            return Response({'status': 'already liked'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': 'liked'})
-
+        return super().like(request, pk)
+    
     @action(detail=True, methods=['post'], url_path=r'unlike')
     def unlike(self, request, pk):
-        comment = get_object_or_404(Comment, pk=pk)
-        try:
-            like = comment.likes.get(user=request.user)
-        except Like.DoesNotExist:
-            return Response({'status': 'not liked'}, status=status.HTTP_400_BAD_REQUEST)
-        like.delete()
-        return Response({'status': 'unliked'})
+        return super().unlike(request, pk)
